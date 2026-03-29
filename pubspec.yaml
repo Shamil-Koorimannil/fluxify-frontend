@@ -1,0 +1,67 @@
+name: fluxify
+description: Social Discovery and Advertising Marketplace app
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management & Navigation
+  get: ^4.6.6
+  
+  # UI & Utilities
+  flutter_screenutil: ^5.9.0
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.0
+  
+  # Network & API
+  dio: ^5.3.2
+  retrofit: ^4.0.3
+  
+  # Local Storage
+  shared_preferences: ^2.2.2
+  get_storage: ^2.0.3
+  
+  # Image Handling
+  image_picker: ^1.0.4
+  
+  # Authentication
+  google_sign_in: ^6.2.1
+  
+  # Utilities
+  intl: ^0.18.1
+  logger: ^2.0.2+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  retrofit_generator: ^8.0.4
+  build_runner: ^2.4.7
+  json_annotation: ^4.8.1
+  json_serializable: ^6.7.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+  
+  # fonts:
+  #   - family: Inter
+  #     fonts:
+  #       - asset: assets/fonts/Inter-Regular.ttf
+  #       - asset: assets/fonts/Inter-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/Inter-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/Inter-Bold.ttf
+  #         weight: 700
