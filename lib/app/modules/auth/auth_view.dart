@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:fluxify/app/core/widgets/fluxify_next_button.dart';
 import 'package:get/get.dart';
+import '../../core/widgets/fluxify_input_field.dart';
+import '../../routes/app_pages.dart';
 import 'auth_controller.dart';
-import '../../../core/widgets/fluxify_input.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../core/values/app_values.dart';
+import '../../../core/constants/app_constants.dart';
 
 class AuthView extends GetView<AuthController> {
   const AuthView({super.key});
@@ -11,37 +12,56 @@ class AuthView extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Colors.black, // Restored Pure Black
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppValues.spacingLarge),
+          padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: AppValues.spacingXLarge * 2),
+              const SizedBox(height: 140),
 
-              // Logo/Brand Section
-              _buildBrandSection(),
+              // 1. Logo Section
+              Image.asset(
+                AppConstants.logoPath,
+                width: Get.width * 0.6,
+                fit: BoxFit.contain,
+              ),
 
-              const SizedBox(height: AppValues.spacingXLarge * 2),
+              const SizedBox(height: 80),
 
-              // Welcome Text
-              _buildWelcomeText(),
+              // 2. Email/Phone Input
+              FluxifyInputField(
+                controller: controller.emailPhoneController,
+                label: 'Email or Phone',
+                borderRadius: 25.0, // Matching your Signup design
+              ),
 
-              const SizedBox(height: AppValues.spacingXLarge),
+              const SizedBox(height: 25),
 
-              // Form Section
-              _buildFormSection(),
+              // 3. Password Input
+              // For the Password field with the visibility toggle
+              Obx(() => FluxifyInputField(
+                controller: controller.passwordController,
+                label: 'Password',
+                isPassword: true,
+                isVisible: controller.isPasswordVisible.value,
+                onToggleVisibility: () => controller.togglePasswordVisibility(),
+                borderRadius: 25.0,
+              )),
 
-              const SizedBox(height: AppValues.spacingLarge),
+              const SizedBox(height: 20),
 
-              // Action Button
-              _buildActionButton(),
+              // 4. Login Button
+              Align(
+                alignment: Alignment.centerRight,
+                child: FluxifyNextButton(onTap: () => controller.login()),
+              ),
 
-              const SizedBox(height: AppValues.spacingMedium),
+              const SizedBox(height: 120),
 
-              // Additional Options
-              _buildAdditionalOptions(),
+              // 5. Footer Link
+              _buildFooter(),
             ],
           ),
         ),
@@ -49,277 +69,27 @@ class AuthView extends GetView<AuthController> {
     );
   }
 
-  Widget _buildBrandSection() {
-    return Column(
-      children: [
-        // Logo placeholder - replace with actual logo
-        Container(
-          width: Get.width * 0.3,
-          height: Get.width * 0.3,
-          decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(AppValues.borderRadiusLarge),
-          ),
-          child: Icon(
-            Icons.storefront,
-            size: Get.width * 0.15,
-            color: AppTheme.primaryColor,
-          ),
-        ),
-        const SizedBox(height: AppValues.spacingMedium),
-        const Text(
-          'Fluxify',
-          style: TextStyle(
-            fontSize: AppValues.fontSizeXXLarge,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primaryColor,
-          ),
-        ),
-        const Text(
-          'Social Discovery & Advertising',
-          style: TextStyle(
-            fontSize: AppValues.fontSizeMedium,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildWelcomeText() {
-    return Obx(() {
-      final title = controller.authMode.value == AuthMode.emailPhone
-          ? 'Welcome Back!'
-          : 'Verify Your Number';
-      final subtitle = controller.authMode.value == AuthMode.emailPhone
-          ? 'Enter your email or phone number to continue'
-          : 'Enter the 6-digit code sent to ${controller.emailPhoneController.text}';
-
-      return Column(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: AppValues.fontSizeXXLarge,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: AppValues.spacingSmall),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: AppValues.fontSizeMedium,
-              color: AppTheme.textSecondary,
-            ),
-          ),
-        ],
-      );
-    });
-  }
-
-  Widget _buildFormSection() {
-    return Obx(() {
-      if (controller.authMode.value == AuthMode.emailPhone) {
-        return FluxifyInput(
-          mode: FluxifyInputMode.emailPhone,
-          controller: controller.emailPhoneController,
-          focusNode: controller.emailPhoneFocusNode,
-          textInputAction: TextInputAction.next,
-          onSubmitted: (value) {
-            if (controller.isEmailPhoneValid.value) {
-              controller.sendOtp();
-            }
-          },
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter email or phone number';
-            }
-            if (!controller.isEmailPhoneValid.value) {
-              return 'Please enter a valid email or phone number';
-            }
-            return null;
-          },
-        );
-      } else {
-        return Column(
+ 
+  Widget _buildFooter() {
+    return GestureDetector(
+      onTap: () => Get.toNamed(Routes.SIGNUP),
+      child: RichText(
+        text: const TextSpan(
+          text: 'New User? ',
+          style: TextStyle(color: Colors.white70, fontSize: 14),
           children: [
-            FluxifyInput(
-              mode: FluxifyInputMode.otp,
-              controller: controller.otpController,
-              focusNode: controller.otpFocusNode,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (value) {
-                if (controller.isOtpValid.value) {
-                  controller.verifyOtp();
-                }
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter OTP';
-                }
-                if (!controller.isOtpValid.value) {
-                  return 'Please enter a valid 6-digit OTP';
-                }
-                return null;
-              },
+            TextSpan(
+              text: 'SIGN UP HERE',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
             ),
-            const SizedBox(height: AppValues.spacingMedium),
-            _buildOtpTimerSection(),
           ],
-        );
-      }
-    });
-  }
-
-  Widget _buildOtpTimerSection() {
-    return Obx(() {
-      if (controller.otpTimer.value > 0) {
-        return Text(
-          'Resend OTP in ${controller.otpTimer.value}s',
-          style: const TextStyle(
-            fontSize: AppValues.fontSizeSmall,
-            color: AppTheme.textSecondary,
-          ),
-        );
-      } else {
-        return TextButton(
-          onPressed: controller.resendOtp,
-          child: const Text(
-            'Resend OTP',
-            style: TextStyle(
-              fontSize: AppValues.fontSizeMedium,
-              color: AppTheme.primaryColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        );
-      }
-    });
-  }
-
-  Widget _buildActionButton() {
-    return Obx(() {
-      final isLoading = controller.isLoading.value;
-      final isEnabled = controller.authMode.value == AuthMode.emailPhone
-          ? controller.isEmailPhoneValid.value
-          : controller.isOtpValid.value;
-
-      final buttonText = controller.authMode.value == AuthMode.emailPhone
-          ? 'Send OTP'
-          : 'Verify & Continue';
-
-      return SizedBox(
-        width: Get.width * AppValues.buttonWidthRatio,
-        child: ElevatedButton(
-          onPressed: isEnabled && !isLoading
-              ? () {
-                  if (controller.authMode.value == AuthMode.emailPhone) {
-                    controller.sendOtp();
-                  } else {
-                    controller.verifyOtp();
-                  }
-                }
-              : null,
-          child: isLoading
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : Text(
-                  buttonText,
-                  style: const TextStyle(
-                    fontSize: AppValues.fontSizeMedium,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
         ),
-      );
-    });
-  }
-
-  Widget _buildAdditionalOptions() {
-    return Obx(() {
-      if (controller.authMode.value == AuthMode.otp) {
-        return TextButton.icon(
-          onPressed: () => controller.changeAuthMode(AuthMode.emailPhone),
-          icon: const Icon(
-            Icons.arrow_back,
-            size: AppValues.iconSizeSmall,
-            color: AppTheme.textSecondary,
-          ),
-          label: const Text(
-            'Change Number',
-            style: TextStyle(
-              fontSize: AppValues.fontSizeMedium,
-              color: AppTheme.textSecondary,
-            ),
-          ),
-        );
-      }
-
-      return Column(
-        children: [
-          const SizedBox(height: AppValues.spacingLarge),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 1,
-                width: Get.width * 0.2,
-                color: AppTheme.borderColor,
-              ),
-              const Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: AppValues.spacingMedium),
-                child: Text(
-                  'OR',
-                  style: TextStyle(
-                    fontSize: AppValues.fontSizeSmall,
-                    color: AppTheme.textTertiary,
-                  ),
-                ),
-              ),
-              Container(
-                height: 1,
-                width: Get.width * 0.2,
-                color: AppTheme.borderColor,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppValues.spacingLarge),
-          SizedBox(
-            width: Get.width * AppValues.buttonWidthRatio,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // TODO: Implement social login
-                Get.snackbar(
-                  'Coming Soon',
-                  'Social login will be available soon',
-                  backgroundColor: AppTheme.primaryColor,
-                  colorText: Colors.white,
-                );
-              },
-              icon: const Icon(
-                Icons.g_mobiledata,
-                size: AppValues.iconSizeMedium,
-              ),
-              label: const Text(
-                'Continue with Google',
-                style: TextStyle(
-                  fontSize: AppValues.fontSizeMedium,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    });
+      ),
+    );
   }
 }

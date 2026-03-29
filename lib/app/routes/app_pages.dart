@@ -3,6 +3,8 @@ import '../modules/auth/auth_binding.dart';
 import '../modules/auth/auth_view.dart';
 import '../modules/auth/signup_binding.dart';
 import '../modules/auth/signup_view.dart';
+import '../modules/home/home_binding.dart';
+import '../modules/home/home_view.dart';
 import '../modules/splash/splash_binding.dart';
 import '../modules/splash/splash_view.dart';
 
@@ -28,6 +30,11 @@ class AppPages {
       name: _Paths.SIGNUP,
       page: () => const SignUpView(),
       binding: SignUpBinding(),
+    ),
+    GetPage(
+      name: _Paths.HOME,
+      page: () => const HomeView(),
+      binding: HomeBinding(),
     ),
   ];
 }

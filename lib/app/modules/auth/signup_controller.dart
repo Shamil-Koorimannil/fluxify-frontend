@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../routes/app_pages.dart';
 
 class SignUpController extends GetxController {
   // Form controllers
@@ -91,9 +92,9 @@ class SignUpController extends GetxController {
   }
 
   void _validateForm() {
-    isFormValid.value = isEmailPhoneValid.value && 
-                       isPasswordValid.value && 
-                       isConfirmPasswordValid.value;
+    isFormValid.value = isEmailPhoneValid.value &&
+        isPasswordValid.value &&
+        isConfirmPasswordValid.value;
   }
 
   void togglePasswordVisibility() {
@@ -120,8 +121,8 @@ class SignUpController extends GetxController {
         colorText: Colors.white,
       );
 
-      // TODO: Navigate to home screen
-      // Get.offAllNamed('/home');
+      // Navigate to home screen
+      Get.offAllNamed(Routes.HOME);
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -139,10 +140,10 @@ class SignUpController extends GetxController {
       isLoading.value = true;
 
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser != null) {
         googleSignInUser.value = googleUser;
-        
+
         Get.snackbar(
           'Success',
           'Signed in with Google successfully!',
@@ -150,8 +151,8 @@ class SignUpController extends GetxController {
           colorText: Colors.white,
         );
 
-        // TODO: Navigate to home screen
-        // Get.offAllNamed('/home');
+        // Navigate to home screen
+        Get.offAllNamed(Routes.HOME);
       }
     } catch (e) {
       Get.snackbar(

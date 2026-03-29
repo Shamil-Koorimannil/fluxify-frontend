@@ -1,129 +1,96 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:async';
+import 'package:google_sign_in/google_sign_in.dart';
+import '../../routes/app_pages.dart';
 
 class AuthController extends GetxController {
-  // Form controllers
+  // 1. Updated Form Controllers
   final emailPhoneController = TextEditingController();
-  final otpController = TextEditingController();
+  final passwordController = TextEditingController(); // Added this!
 
-  // Form focus nodes
-  final emailPhoneFocusNode = FocusNode();
-  final otpFocusNode = FocusNode();
-
-  // Reactive variables
+  // 2. Reactive variables
   var isLoading = false.obs;
-  var isEmailPhoneValid = false.obs;
-  var isOtpValid = false.obs;
-  var isOtpSent = false.obs;
-  var authMode = AuthMode.emailPhone.obs;
+  var isPasswordVisible = false.obs; // For the eye icon toggle
 
-  // Timer for OTP
-  var otpTimer = 60.obs;
-  late Timer _timer;
-
-  @override
-  void onInit() {
-    super.onInit();
-    _setupListeners();
-  }
+  // Google Sign-In
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  var googleSignInUser = Rx<GoogleSignInAccount?>(null);
 
   @override
   void onClose() {
     emailPhoneController.dispose();
-    otpController.dispose();
-    emailPhoneFocusNode.dispose();
-    otpFocusNode.dispose();
-    if (_timer.isActive) _timer.cancel();
+    passwordController.dispose();
     super.onClose();
   }
 
-  void _setupListeners() {
-    // Email/Phone validation
-    emailPhoneController.addListener(() {
-      final value = emailPhoneController.text.trim();
-      isEmailPhoneValid.value = _validateEmailPhone(value);
-    });
-
-    // OTP validation
-    otpController.addListener(() {
-      final value = otpController.text.trim();
-      isOtpValid.value =
-          value.length == 6 && RegExp(r'^[0-9]{6}$').hasMatch(value);
-    });
+  // 3. Toggle Password Visibility
+  void togglePasswordVisibility() {
+    isPasswordVisible.value = !isPasswordVisible.value;
   }
 
-  bool _validateEmailPhone(String value) {
-    if (value.isEmpty) return false;
+  // 4. Updated Login Logic
+  void login() async {
+    final email = emailPhoneController.text.trim();
+    final password = passwordController.text.trim();
 
-    // Email validation
-    if (RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-      return true;
-    }
-
-    // Phone validation (10 digits for Indian numbers)
-    if (RegExp(r'^[6-9]\d{9}$').hasMatch(value)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  void sendOtp() async {
-    if (!isEmailPhoneValid.value) return;
-
-    isLoading.value = true;
-
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Success
-      isOtpSent.value = true;
-      authMode.value = AuthMode.otp;
-      _startOtpTimer();
-
-      Get.snackbar(
-        'OTP Sent',
-        'Verification code sent to ${emailPhoneController.text}',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-    } catch (e) {
+    if (email.isEmpty || password.isEmpty) {
       Get.snackbar(
         'Error',
-        'Failed to send OTP. Please try again.',
-        backgroundColor: Colors.red,
+        'Please enter both email and password',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
         colorText: Colors.white,
       );
-    } finally {
-      isLoading.value = false;
+      return;
     }
-  }
-
-  void verifyOtp() async {
-    if (!isOtpValid.value) return;
 
     isLoading.value = true;
 
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      // TODO: Connect to Shamil's Backend API here
+      await Future.delayed(const Duration(seconds: 2)); // Simulating network
 
-      // Success - Navigate to home
       Get.snackbar(
         'Success',
-        'Login successful!',
-        backgroundColor: Colors.green,
+        'Welcome back to Fluxify!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.withOpacity(0.8),
         colorText: Colors.white,
       );
 
-      // TODO: Navigate to home screen
-      // Get.offAllNamed('/home');
+      // Navigate to Home after successful login
+      Get.offAllNamed(Routes.HOME);
+    } catch (e) {
+      Get.snackbar('Error', 'Login failed. Check your credentials.');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // 5. Google Sign-In Method
+  Future<void> signInWithGoogle() async {
+    try {
+      isLoading.value = true;
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser != null) {
+        googleSignInUser.value = googleUser;
+
+        Get.snackbar(
+          'Success',
+          'Signed in with Google successfully!',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        // Navigate to home screen
+        Get.offAllNamed(Routes.HOME);
+      }
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Invalid OTP. Please try again.',
+        'Google sign-in failed. Please try again.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -132,41 +99,7 @@ class AuthController extends GetxController {
     }
   }
 
-  void resendOtp() async {
-    otpTimer.value = 60;
-    _startOtpTimer();
-    sendOtp();
-  }
-
-  void _startOtpTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (otpTimer.value > 0) {
-        otpTimer.value--;
-      } else {
-        timer.cancel();
-      }
-    });
-  }
-
-  void changeAuthMode(AuthMode mode) {
-    authMode.value = mode;
-    if (mode == AuthMode.emailPhone) {
-      // Clear OTP field when switching back
-      otpController.clear();
-      isOtpValid.value = false;
-    }
-  }
-
-  void clearForm() {
-    emailPhoneController.clear();
-    otpController.clear();
-    isEmailPhoneValid.value = false;
-    isOtpValid.value = false;
-    isOtpSent.value = false;
-    authMode.value = AuthMode.emailPhone;
-    if (_timer.isActive) _timer.cancel();
-    otpTimer.value = 60;
+  void goToSignup() {
+    Get.toNamed(Routes.SIGNUP);
   }
 }
-
-enum AuthMode { emailPhone, otp }
