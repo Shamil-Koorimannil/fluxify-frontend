@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fluxify/app/core/widgets/fluxify_next_button.dart';
+import 'package:fluxify/core/widgets/fluxify_next_button.dart';
 import 'package:get/get.dart';
-import '../../core/widgets/fluxify_input_field.dart';
+import '../../../core/widgets/fluxify_input_field.dart';
 import '../../routes/app_pages.dart';
 import 'auth_controller.dart';
 import '../../../core/constants/app_constants.dart';
