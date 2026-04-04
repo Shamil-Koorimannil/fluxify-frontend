@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'app/routes/app_pages.dart';
 import 'core/theme/app_theme.dart';
 
@@ -22,7 +22,7 @@ class FluxifyApp extends StatelessWidget {
           title: 'Fluxify',
           theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
-          initialRoute: AppPages.INITIAL,
+          initialRoute: AppPages.initial,
           getPages: AppPages.routes,
         );
       },

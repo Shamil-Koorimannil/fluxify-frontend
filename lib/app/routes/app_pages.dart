@@ -1,40 +1,39 @@
-import 'package:get/get.dart';
+import 'package:fluxify/app/modules/auth/otp_verification_view.dart';
+import 'package:fluxify/app/modules/splash/splash_controller.dart';
+import 'package:get/get_navigation/src/routes/get_route.dart';
 import '../modules/auth/auth_binding.dart';
-import '../modules/auth/auth_view.dart';
-import '../modules/auth/signup_binding.dart';
-import '../modules/auth/signup_view.dart';
+import '../modules/auth/login_view.dart';
 import '../modules/home/home_binding.dart';
 import '../modules/home/home_view.dart';
 import '../modules/splash/splash_binding.dart';
 import '../modules/splash/splash_view.dart';
-
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.SPLASH;
+  static const initial = AppRoutes.splash;
 
   static final routes = [
     GetPage(
-      name: _Paths.SPLASH,
+      name: AppRoutes.splash,
       page: () => const SplashView(),
       binding: SplashBinding(),
     ),
     GetPage(
-      name: _Paths.AUTH,
+      name: AppRoutes.auth,
       page: () => const AuthView(),
       binding: AuthBinding(),
     ),
     GetPage(
-      name: _Paths.SIGNUP,
-      page: () => const SignUpView(),
-      binding: SignUpBinding(),
-    ),
-    GetPage(
-      name: _Paths.HOME,
+      name: AppRoutes.home,
       page: () => const HomeView(),
       binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.otpView,
+      page: () => const OtpVerificationView(),
+      binding: AuthBinding(),
     ),
   ];
 }

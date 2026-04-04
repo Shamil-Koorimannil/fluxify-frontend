@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../theme/app_theme.dart';
-import '../values/app_values.dart';
 
-enum FluxifyInputMode { emailPhone, otp }
+enum FluxifyInputStyle { dark, light }
 
 class FluxifyInput extends StatefulWidget {
-  final FluxifyInputMode mode;
-  final String? hintText;
-  final String? labelText;
   final TextEditingController? controller;
+  final String? labelText;
+  final String? hintText;
   final bool obscureText;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
@@ -25,13 +23,14 @@ class FluxifyInput extends StatefulWidget {
   final TextInputAction? textInputAction;
   final bool autofocus;
   final EdgeInsets? contentPadding;
+  final FluxifyInputStyle style;
+  final double borderRadius;
 
   const FluxifyInput({
     super.key,
-    required this.mode,
-    this.hintText,
-    this.labelText,
     this.controller,
+    this.labelText,
+    this.hintText,
     this.obscureText = false,
     this.keyboardType,
     this.inputFormatters,
@@ -46,6 +45,8 @@ class FluxifyInput extends StatefulWidget {
     this.textInputAction,
     this.autofocus = false,
     this.contentPadding,
+    this.style = FluxifyInputStyle.light,
+    this.borderRadius = 12.0,
   });
 
   @override
@@ -77,15 +78,13 @@ class _FluxifyInputState extends State<FluxifyInput> {
 
   @override
   Widget build(BuildContext context) {
-    final double inputWidth = Get.width * AppValues.inputWidthRatio;
-
     return SizedBox(
-      width: inputWidth,
+      width: widget.style == FluxifyInputStyle.light ? Get.width * 0.9 : null,
       child: TextFormField(
         controller: widget.controller,
         obscureText: _obscureText,
-        keyboardType: _getKeyboardType(),
-        inputFormatters: _getInputFormatters(),
+        keyboardType: widget.keyboardType,
+        inputFormatters: widget.inputFormatters,
         maxLength: widget.maxLength,
         enabled: widget.enabled,
         focusNode: _focusNode,
@@ -94,121 +93,37 @@ class _FluxifyInputState extends State<FluxifyInput> {
         onChanged: widget.onChanged,
         onFieldSubmitted: widget.onSubmitted,
         validator: widget.validator,
-        style: const TextStyle(
-          fontSize: AppValues.fontSizeMedium,
-          color: AppTheme.textPrimary,
-        ),
+        style: _getTextStyle(),
         decoration: _buildInputDecoration(),
       ),
     );
   }
 
+  TextStyle _getTextStyle() {
+    switch (widget.style) {
+      case FluxifyInputStyle.dark:
+        return const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+        );
+      case FluxifyInputStyle.light:
+        return const TextStyle(
+          fontSize: 14,
+          color: AppTheme.textPrimary,
+        );
+    }
+  }
+
   InputDecoration _buildInputDecoration() {
-    String hintText = widget.hintText ?? _getDefaultHintText();
-    String? labelText = widget.labelText;
+    Widget? suffixIcon = widget.suffixIcon;
 
-    Widget? prefixIcon = widget.prefixIcon ?? _getDefaultPrefixIcon();
-    Widget? suffixIcon = widget.suffixIcon ?? _getDefaultSuffixIcon();
-
-    return InputDecoration(
-      hintText: hintText,
-      labelText: labelText,
-      prefixIcon: prefixIcon,
-      suffixIcon: suffixIcon,
-      contentPadding: widget.contentPadding ??
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      counterText: '',
-      filled: true,
-      fillColor: widget.enabled
-          ? AppTheme.surfaceColor
-          : AppTheme.borderColor.withOpacity(0.3),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppTheme.borderRadius),
-        borderSide: const BorderSide(
-          color: AppTheme.borderColor,
-          width: 1.5,
-        ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppTheme.borderRadius),
-        borderSide: BorderSide(
-          color: _focusNode.hasFocus
-              ? AppTheme.primaryColor
-              : AppTheme.borderColor,
-          width: _focusNode.hasFocus ? 2.0 : 1.5,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppTheme.borderRadius),
-        borderSide: const BorderSide(
-          color: AppTheme.primaryColor,
-          width: 2.0,
-        ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppTheme.borderRadius),
-        borderSide: const BorderSide(
-          color: AppTheme.errorColor,
-          width: 1.5,
-        ),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppTheme.borderRadius),
-        borderSide: const BorderSide(
-          color: AppTheme.errorColor,
-          width: 2.0,
-        ),
-      ),
-      hintStyle: const TextStyle(
-        color: AppTheme.textTertiary,
-        fontSize: AppValues.fontSizeMedium,
-      ),
-      labelStyle: TextStyle(
-        color: _focusNode.hasFocus
-            ? AppTheme.primaryColor
-            : AppTheme.textSecondary,
-        fontSize: AppValues.fontSizeMedium,
-      ),
-    );
-  }
-
-  String _getDefaultHintText() {
-    switch (widget.mode) {
-      case FluxifyInputMode.emailPhone:
-        return 'Enter email or phone number';
-      case FluxifyInputMode.otp:
-        return 'Enter 6-digit OTP';
-    }
-  }
-
-  Widget? _getDefaultPrefixIcon() {
-    switch (widget.mode) {
-      case FluxifyInputMode.emailPhone:
-        return Icon(
-          Icons.person_outline,
-          color: _focusNode.hasFocus
-              ? AppTheme.primaryColor
-              : AppTheme.textSecondary,
-          size: AppValues.iconSizeMedium,
-        );
-      case FluxifyInputMode.otp:
-        return Icon(
-          Icons.lock_outline,
-          color: _focusNode.hasFocus
-              ? AppTheme.primaryColor
-              : AppTheme.textSecondary,
-          size: AppValues.iconSizeMedium,
-        );
-    }
-  }
-
-  Widget? _getDefaultSuffixIcon() {
-    if (widget.mode == FluxifyInputMode.otp && widget.obscureText) {
-      return IconButton(
+    // Add password visibility toggle for dark style
+    if (widget.style == FluxifyInputStyle.dark && widget.obscureText) {
+      suffixIcon = IconButton(
         icon: Icon(
-          _obscureText ? Icons.visibility_off : Icons.visibility,
-          color: AppTheme.textSecondary,
-          size: AppValues.iconSizeMedium,
+          _obscureText ? Icons.visibility : Icons.visibility_outlined,
+          color: Colors.white.withOpacity(0.6),
+          size: 20,
         ),
         onPressed: () {
           setState(() {
@@ -217,37 +132,105 @@ class _FluxifyInputState extends State<FluxifyInput> {
         },
       );
     }
-    return null;
-  }
 
-  TextInputType _getKeyboardType() {
-    if (widget.keyboardType != null) return widget.keyboardType!;
+    switch (widget.style) {
+      case FluxifyInputStyle.dark:
+        return InputDecoration(
+          labelText: widget.labelText,
+          hintText: widget.hintText,
+          labelStyle: const TextStyle(color: Colors.white, fontSize: 14),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          filled: true,
+          fillColor: Colors.black,
+          prefixIcon: widget.prefixIcon,
+          suffixIcon: suffixIcon,
+          contentPadding: widget.contentPadding ??
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          counterText: '',
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderSide: BorderSide(
+              color: Colors.white.withOpacity(0.8),
+              width: 1.2,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderSide: const BorderSide(
+              color: Colors.white,
+              width: 1.5,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderSide: const BorderSide(
+              color: AppTheme.darkError,
+              width: 1.5,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderSide: const BorderSide(
+              color: AppTheme.darkError,
+              width: 2.0,
+            ),
+          ),
+        );
 
-    switch (widget.mode) {
-      case FluxifyInputMode.emailPhone:
-        return TextInputType.emailAddress;
-      case FluxifyInputMode.otp:
-        return TextInputType.number;
+      case FluxifyInputStyle.light:
+        return InputDecoration(
+          labelText: widget.labelText,
+          hintText: widget.hintText,
+          prefixIcon: widget.prefixIcon,
+          suffixIcon: suffixIcon,
+          contentPadding: widget.contentPadding ??
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          counterText: '',
+          filled: true,
+          fillColor: widget.enabled
+              ? AppTheme.lightSurface
+              : AppTheme.borderColor.withOpacity(0.3),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderSide:
+                const BorderSide(color: AppTheme.borderColor, width: 1.5),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderSide: BorderSide(
+              color: _focusNode.hasFocus
+                  ? AppTheme.primaryColor
+                  : AppTheme.borderColor,
+              width: _focusNode.hasFocus ? 2.0 : 1.5,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderSide:
+                const BorderSide(color: AppTheme.primaryColor, width: 2.0),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderSide:
+                const BorderSide(color: AppTheme.lightError, width: 1.5),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderSide:
+                const BorderSide(color: AppTheme.lightError, width: 2.0),
+          ),
+          hintStyle: const TextStyle(
+            color: AppTheme.textTertiary,
+            fontSize: 14,
+          ),
+          labelStyle: TextStyle(
+            color: _focusNode.hasFocus
+                ? AppTheme.primaryColor
+                : AppTheme.textSecondary,
+            fontSize: 14,
+          ),
+        );
     }
-  }
-
-  List<TextInputFormatter> _getInputFormatters() {
-    List<TextInputFormatter> formatters = [];
-
-    if (widget.inputFormatters != null) {
-      formatters.addAll(widget.inputFormatters!);
-    }
-
-    switch (widget.mode) {
-      case FluxifyInputMode.otp:
-        formatters.add(FilteringTextInputFormatter.digitsOnly);
-        formatters.add(LengthLimitingTextInputFormatter(6));
-        break;
-      case FluxifyInputMode.emailPhone:
-        // No additional formatters for email/phone
-        break;
-    }
-
-    return formatters;
   }
 }

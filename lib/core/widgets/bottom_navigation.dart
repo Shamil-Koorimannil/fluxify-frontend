@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import '../../core/constants/app_constants.dart';
+import '../constants/app_colors.dart';
 
 class BottomNavigation extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
   const BottomNavigation({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 60.h,
       decoration: BoxDecoration(
-        color: AppConstants.backgroundColor,
+        color: AppColors.backgroundColor,
         border: Border(
           top: BorderSide(
-            color: AppConstants.white24Color,
+            color: AppColors.white24,
             width: 1,
           ),
         ),
@@ -78,18 +77,14 @@ class BottomNavigation extends StatelessWidget {
           Icon(
             icon,
             size: 24.w,
-            color: isSelected
-                ? AppConstants.whiteColor
-                : AppConstants.white54Color,
+            color: isSelected ? AppColors.white : AppColors.white54,
           ),
           SizedBox(height: 4.h),
           Text(
             label,
             style: TextStyle(
               fontSize: 10.sp,
-              color: isSelected
-                  ? AppConstants.whiteColor
-                  : AppConstants.white54Color,
+              color: isSelected ? AppColors.white : AppColors.white54,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
